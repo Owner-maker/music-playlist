@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type Playlist struct {
-	Data []Song `json:"data"`
+type PlaylistDomain struct {
+	Data []SongParseDomain `json:"data"`
 }
 
-type Song struct {
+type SongParseDomain struct {
 	ID       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
 	Duration Duration  `json:"duration"`
@@ -37,7 +37,16 @@ func (md *Duration) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (s Song) Convert() domain.Song {
+func ConvertDomainPlaylist(s []SongParseDomain) []domain.Song {
+	res := make([]domain.Song, len(s))
+	for i, song := range s {
+		res[i] = song.convertDomain()
+	}
+
+	return res
+}
+
+func (s SongParseDomain) convertDomain() domain.Song {
 	return domain.Song{
 		ID:       s.ID,
 		Name:     s.Name,
@@ -45,10 +54,41 @@ func (s Song) Convert() domain.Song {
 	}
 }
 
-func ConvertSongs(songs []Song) []domain.Song {
-	domainSongs := make([]domain.Song, len(songs))
-	for i, song := range songs {
-		domainSongs[i] = song.Convert()
+type PlaylistSchema struct {
+	Data []SongParseSchema `json:"data"`
+}
+
+type SongParseSchema struct {
+	ID       uuid.UUID
+	Name     string
+	Duration time.Duration
+}
+
+func ConvertSchemaList(s []domain.Song) (PlaylistSchema, error) {
+	data := make([]SongParseSchema, len(s))
+	for i, song := range s {
+		conv, err := convertSchema(song)
+		if err != nil {
+			return PlaylistSchema{}, err
+		}
+
+		data[i] = conv
 	}
-	return domainSongs
+
+	return PlaylistSchema{Data: data}, nil
+}
+
+func convertSchema(s domain.Song) (SongParseSchema, error) {
+	conv, err := time.ParseDuration(s.Duration.String())
+	if err != nil {
+		return SongParseSchema{}, err
+	}
+
+	res := SongParseSchema{
+		ID:       s.ID,
+		Name:     s.Name,
+		Duration: conv,
+	}
+
+	return res, nil
 }

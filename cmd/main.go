@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"music-playlist/internal/config"
+	"music-playlist/internal/domain"
 	"music-playlist/internal/repository"
 	"music-playlist/pkg/logger/handlers/slogpretty"
 	"os"
@@ -19,8 +20,12 @@ func main() {
 	log := setupLogger(cfg.Env)
 	log.Info("starting application", slog.Any("env", &cfg))
 
-	repository.NewPlaylist(cfg.StoragePath)
+	repo := repository.NewPlaylist(cfg.StoragePath)
 
+	err := repo.Upload([]domain.Song{})
+	if err != nil {
+		return
+	}
 }
 
 func setupLogger(env string) *slog.Logger {
