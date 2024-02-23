@@ -2,7 +2,9 @@ package service
 
 import (
 	"github.com/google/uuid"
+	"log/slog"
 	"music-playlist/internal/domain"
+	"music-playlist/pkg/logger/sl"
 )
 
 type Playlist struct {
@@ -12,17 +14,26 @@ type Playlist struct {
 
 func NewPlaylist(repo domain.MusicRepository) (*Playlist, error) {
 	p := &Playlist{repo: repo}
-
-	songs, err := repo.Download()
+	err := p.initCache()
 	if err != nil {
 		return nil, err
 	}
 
-	cache := domain.NewDoublyLinkedList()
-	cache.AppendMany(songs...)
-	p.cache = cache
-
 	return p, nil
+}
+
+func (s Playlist) initCache() error {
+	_, err := s.repo.Download()
+	if err != nil {
+		slog.Error("failed to download songs from file", sl.Err(err))
+		return err
+	}
+
+	cache := domain.NewDoublyLinkedList()
+	//cache.AppendMany(songs...)
+	s.cache = cache
+
+	return nil
 }
 
 func (s Playlist) Add(data domain.Song) error {

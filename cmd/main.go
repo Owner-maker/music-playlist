@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"music-playlist/internal/config"
+	"music-playlist/internal/repository"
 	"music-playlist/pkg/logger/handlers/slogpretty"
 	"os"
 )
@@ -17,6 +18,9 @@ func main() {
 
 	log := setupLogger(cfg.Env)
 	log.Info("starting application", slog.Any("env", &cfg))
+
+	repository.NewPlaylist(cfg.StoragePath)
+
 }
 
 func setupLogger(env string) *slog.Logger {
