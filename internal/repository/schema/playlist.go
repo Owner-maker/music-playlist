@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type PlaylistDomain struct {
-	Data []SongParseDomain `json:"data"`
+type DownloadedPlaylist struct {
+	Data DownloadedSongList `json:"data"`
 }
 
-type SongParseDomain struct {
+type DownloadedSong struct {
 	ID       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
 	Duration Duration  `json:"duration"`
@@ -37,16 +37,18 @@ func (md *Duration) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func ConvertDomainPlaylist(s []SongParseDomain) []domain.Song {
-	res := make([]domain.Song, len(s))
-	for i, song := range s {
-		res[i] = song.convertDomain()
+type DownloadedSongList []DownloadedSong
+
+func (l DownloadedSongList) Convert() []domain.Song {
+	res := make([]domain.Song, len(l))
+	for i, song := range l {
+		res[i] = song.convert()
 	}
 
 	return res
 }
 
-func (s SongParseDomain) convertDomain() domain.Song {
+func (s DownloadedSong) convert() domain.Song {
 	return domain.Song{
 		ID:       s.ID,
 		Name:     s.Name,
@@ -54,40 +56,40 @@ func (s SongParseDomain) convertDomain() domain.Song {
 	}
 }
 
-type PlaylistSchema struct {
-	Data []SongParseSchema `json:"data"`
+type UploadPlaylist struct {
+	Data []UploadSong `json:"data"`
 }
 
-type SongParseSchema struct {
+type UploadSong struct {
 	ID       uuid.UUID
 	Name     string
-	Duration time.Duration
+	Duration string
 }
 
-func ConvertSchemaList(s []domain.Song) (PlaylistSchema, error) {
-	data := make([]SongParseSchema, len(s))
+func ConvToUploadList(s []domain.Song) (UploadPlaylist, error) {
+	data := make([]UploadSong, len(s))
 	for i, song := range s {
-		conv, err := convertSchema(song)
+		conv, err := convToUpload(song)
 		if err != nil {
-			return PlaylistSchema{}, err
+			return UploadPlaylist{}, err
 		}
 
 		data[i] = conv
 	}
 
-	return PlaylistSchema{Data: data}, nil
+	return UploadPlaylist{Data: data}, nil
 }
 
-func convertSchema(s domain.Song) (SongParseSchema, error) {
+func convToUpload(s domain.Song) (UploadSong, error) {
 	conv, err := time.ParseDuration(s.Duration.String())
 	if err != nil {
-		return SongParseSchema{}, err
+		return UploadSong{}, err
 	}
 
-	res := SongParseSchema{
+	res := UploadSong{
 		ID:       s.ID,
 		Name:     s.Name,
-		Duration: conv,
+		Duration: conv.String(),
 	}
 
 	return res, nil

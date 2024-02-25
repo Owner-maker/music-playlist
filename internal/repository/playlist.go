@@ -2,7 +2,6 @@ package repository
 
 import (
 	"encoding/json"
-	"github.com/google/uuid"
 	"music-playlist/internal/domain"
 	"music-playlist/internal/repository/schema"
 	"os"
@@ -17,15 +16,7 @@ func NewPlaylist(filename string) Playlist {
 }
 
 func (p Playlist) Upload(s []domain.Song) error {
-	s = []domain.Song{
-		{
-			ID:       uuid.UUID{23},
-			Name:     "asdasdasd",
-			Duration: 1123123,
-		},
-	}
-
-	conv, err := schema.ConvertSchemaList(s)
+	conv, err := schema.ConvToUploadList(s)
 	if err != nil {
 		return err
 	}
@@ -45,15 +36,15 @@ func (p Playlist) Upload(s []domain.Song) error {
 func (p Playlist) Download() ([]domain.Song, error) {
 	file, err := os.Open(p.filename)
 	if err != nil {
-		return nil, err
+		return []domain.Song{}, err
 	}
 	defer file.Close()
 
-	var playlist schema.PlaylistDomain
+	var playlist schema.DownloadedPlaylist
 	err = json.NewDecoder(file).Decode(&playlist)
 	if err != nil {
-		return nil, err
+		return []domain.Song{}, err
 	}
 
-	return schema.ConvertDomainPlaylist(playlist.Data), nil
+	return playlist.Data.Convert(), nil
 }

@@ -33,6 +33,6 @@ type MusicService interface {
 }
 
 type MusicRepository interface {
-	Upload(s []Song) error
-	Download() ([]Song, error)
+	Upload(s []Song) error     // Upload выгружает данные плейлиста в файл, создает файл при необходимости
+	Download() ([]Song, error) // Download загружает данные плейлиста из файла
 }

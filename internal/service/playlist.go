@@ -12,28 +12,19 @@ type Playlist struct {
 	repo  domain.MusicRepository
 }
 
-func NewPlaylist(repo domain.MusicRepository) (*Playlist, error) {
-	p := &Playlist{repo: repo}
-	err := p.initCache()
-	if err != nil {
-		return nil, err
-	}
-
-	return p, nil
+func NewPlaylist(repo domain.MusicRepository, cache *domain.DoublyLinkedList) *Playlist {
+	return &Playlist{repo: repo, cache: cache}
 }
 
-func (s Playlist) initCache() error {
-	_, err := s.repo.Download()
+func InitCache(repo domain.MusicRepository) *domain.DoublyLinkedList {
+	data, err := repo.Download()
 	if err != nil {
-		slog.Error("failed to download songs from file", sl.Err(err))
-		return err
+		slog.Warn("failed to download songs from file", sl.Err(err))
 	}
 
 	cache := domain.NewDoublyLinkedList()
-	//cache.AppendMany(songs...)
-	s.cache = cache
-
-	return nil
+	cache.AppendMany(data...)
+	return cache
 }
 
 func (s Playlist) Add(data domain.Song) error {
