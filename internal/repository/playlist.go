@@ -15,7 +15,7 @@ func NewPlaylist(filename string) Playlist {
 	return Playlist{filename: filename}
 }
 
-func (p Playlist) Upload(s []domain.Song) error {
+func (p Playlist) Upload(s []*domain.Song) error {
 	conv, err := schema.ConvToUploadList(s)
 	if err != nil {
 		return err
@@ -33,17 +33,17 @@ func (p Playlist) Upload(s []domain.Song) error {
 	return nil
 }
 
-func (p Playlist) Download() ([]domain.Song, error) {
+func (p Playlist) Download() ([]*domain.Song, error) {
 	file, err := os.Open(p.filename)
 	if err != nil {
-		return []domain.Song{}, err
+		return []*domain.Song{}, err
 	}
 	defer file.Close()
 
 	var playlist schema.DownloadedPlaylist
 	err = json.NewDecoder(file).Decode(&playlist)
 	if err != nil {
-		return []domain.Song{}, err
+		return []*domain.Song{}, err
 	}
 
 	return playlist.Data.Convert(), nil

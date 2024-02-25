@@ -27,12 +27,22 @@ func InitCache(repo domain.MusicRepository) *domain.DoublyLinkedList {
 	return cache
 }
 
-func (s Playlist) Add(data domain.Song) error {
+// Save TODO проверить
+func (s Playlist) Save() error {
+	data := s.cache.GetAll()
+	if err := s.repo.Upload(data); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (s Playlist) AddMany(data []domain.Song) error {
-	// TODO transaction
+func (s Playlist) Add(data *domain.Song) error {
+	return nil
+}
+
+func (s Playlist) AddMany(data []*domain.Song) error {
+	// TODO transaction ?
 
 	for _, v := range data {
 		if err := s.Add(v); err != nil {
@@ -43,17 +53,17 @@ func (s Playlist) AddMany(data []domain.Song) error {
 	return nil
 }
 
-func (s Playlist) Get(id uuid.UUID) (domain.Song, error) {
+func (s Playlist) Get() (*domain.Song, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Playlist) GetAll() ([]domain.Song, error) {
+func (s Playlist) GetAll() ([]*domain.Song, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Playlist) Update(data domain.Song) error {
+func (s Playlist) Update(data *domain.Song) error {
 	//TODO implement me
 	panic("implement me")
 }

@@ -39,8 +39,8 @@ func (md *Duration) UnmarshalJSON(b []byte) error {
 
 type DownloadedSongList []DownloadedSong
 
-func (l DownloadedSongList) Convert() []domain.Song {
-	res := make([]domain.Song, len(l))
+func (l DownloadedSongList) Convert() []*domain.Song {
+	res := make([]*domain.Song, len(l))
 	for i, song := range l {
 		res[i] = song.convert()
 	}
@@ -48,8 +48,8 @@ func (l DownloadedSongList) Convert() []domain.Song {
 	return res
 }
 
-func (s DownloadedSong) convert() domain.Song {
-	return domain.Song{
+func (s DownloadedSong) convert() *domain.Song {
+	return &domain.Song{
 		ID:       s.ID,
 		Name:     s.Name,
 		Duration: s.Duration.Duration,
@@ -66,7 +66,7 @@ type UploadSong struct {
 	Duration string
 }
 
-func ConvToUploadList(s []domain.Song) (UploadPlaylist, error) {
+func ConvToUploadList(s []*domain.Song) (UploadPlaylist, error) {
 	data := make([]UploadSong, len(s))
 	for i, song := range s {
 		conv, err := convToUpload(song)
@@ -80,7 +80,7 @@ func ConvToUploadList(s []domain.Song) (UploadPlaylist, error) {
 	return UploadPlaylist{Data: data}, nil
 }
 
-func convToUpload(s domain.Song) (UploadSong, error) {
+func convToUpload(s *domain.Song) (UploadSong, error) {
 	conv, err := time.ParseDuration(s.Duration.String())
 	if err != nil {
 		return UploadSong{}, err
