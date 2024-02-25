@@ -2,7 +2,9 @@ package service
 
 import (
 	"github.com/google/uuid"
+	"log/slog"
 	"music-playlist/internal/domain"
+	"music-playlist/pkg/logger/sl"
 )
 
 type Playlist struct {
@@ -10,27 +12,37 @@ type Playlist struct {
 	repo  domain.MusicRepository
 }
 
-func NewPlaylist(repo domain.MusicRepository) (*Playlist, error) {
-	p := &Playlist{repo: repo}
+func NewPlaylist(repo domain.MusicRepository, cache *domain.DoublyLinkedList) *Playlist {
+	return &Playlist{repo: repo, cache: cache}
+}
 
-	songs, err := repo.Download()
+func InitCache(repo domain.MusicRepository) *domain.DoublyLinkedList {
+	data, err := repo.Download()
 	if err != nil {
-		return nil, err
+		slog.Warn("failed to download songs from file", sl.Err(err))
 	}
 
 	cache := domain.NewDoublyLinkedList()
-	cache.AppendMany(songs...)
-	p.cache = cache
-
-	return p, nil
+	cache.AppendMany(data...)
+	return cache
 }
 
-func (s Playlist) Add(data domain.Song) error {
+// Save TODO проверить
+func (s Playlist) Save() error {
+	data := s.cache.GetAll()
+	if err := s.repo.Upload(data); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (s Playlist) AddMany(data []domain.Song) error {
-	// TODO transaction
+func (s Playlist) Add(data *domain.Song) error {
+	return nil
+}
+
+func (s Playlist) AddMany(data []*domain.Song) error {
+	// TODO transaction ?
 
 	for _, v := range data {
 		if err := s.Add(v); err != nil {
@@ -41,17 +53,17 @@ func (s Playlist) AddMany(data []domain.Song) error {
 	return nil
 }
 
-func (s Playlist) Get(id uuid.UUID) (domain.Song, error) {
+func (s Playlist) Get() (*domain.Song, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Playlist) GetAll() ([]domain.Song, error) {
+func (s Playlist) GetAll() ([]*domain.Song, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Playlist) Update(data domain.Song) error {
+func (s Playlist) Update(data *domain.Song) error {
 	//TODO implement me
 	panic("implement me")
 }

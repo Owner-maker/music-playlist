@@ -10,14 +10,14 @@ type DoublyLinkedList struct {
 type Node struct {
 	next *Node
 	prev *Node
-	data Song
+	data *Song
 }
 
 func NewDoublyLinkedList() *DoublyLinkedList {
 	return &DoublyLinkedList{}
 }
 
-func (l *DoublyLinkedList) Append(data Song) {
+func (l *DoublyLinkedList) Append(data *Song) {
 	newNode := &Node{data: data, prev: nil, next: nil}
 
 	if l.head == nil {
@@ -31,17 +31,22 @@ func (l *DoublyLinkedList) Append(data Song) {
 	l.tail = newNode
 }
 
-func (l *DoublyLinkedList) AppendMany(data ...Song) {
+func (l *DoublyLinkedList) AppendMany(data ...*Song) {
 	for _, v := range data {
 		l.Append(v)
 	}
 }
 
-func (l *DoublyLinkedList) MoveForward() {
+func (l *DoublyLinkedList) GetAll() []*Song {
+	res := make([]*Song, 0)
+
 	current := l.head
 	for current != nil {
+		res = append(res, current.data)
 		current = current.next
 	}
+
+	return res
 }
 
 func (l *DoublyLinkedList) MoveBackward() {
