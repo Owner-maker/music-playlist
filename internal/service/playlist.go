@@ -37,28 +37,21 @@ func (s Playlist) Save() error {
 	return nil
 }
 
-func (s Playlist) Add(data *domain.Song) error {
-	return nil
+func (s Playlist) Add(data *domain.Song) {
+	s.cache.Append(data)
 }
 
-func (s Playlist) AddMany(data []*domain.Song) error {
-	// TODO transaction ?
-
+func (s Playlist) AddMany(data []*domain.Song) {
 	for _, v := range data {
-		if err := s.Add(v); err != nil {
-			return err
-		}
+		s.Add(v)
 	}
-
-	return nil
 }
 
-func (s Playlist) Get() (*domain.Song, error) {
-	//TODO implement me
-	panic("implement me")
+func (s Playlist) Get() domain.SongResponse {
+	return s.cache.Get()
 }
 
-func (s Playlist) GetAll() ([]*domain.Song, error) {
+func (s Playlist) GetAll() []domain.SongResponse {
 	//TODO implement me
 	panic("implement me")
 }

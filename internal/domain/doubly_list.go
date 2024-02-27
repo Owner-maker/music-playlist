@@ -1,6 +1,8 @@
 package domain
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type DoublyLinkedList struct {
 	head *Node
@@ -18,6 +20,9 @@ func NewDoublyLinkedList() *DoublyLinkedList {
 }
 
 func (l *DoublyLinkedList) Append(data *Song) {
+	l.head.data.Meta.Mu.Lock()
+	defer l.head.data.Meta.Mu.Unlock()
+
 	newNode := &Node{data: data, prev: nil, next: nil}
 
 	if l.head == nil {
@@ -29,6 +34,19 @@ func (l *DoublyLinkedList) Append(data *Song) {
 	newNode.prev = l.tail
 	l.tail.next = newNode
 	l.tail = newNode
+}
+
+func (l *DoublyLinkedList) Get() SongResponse {
+	l.head.data.Meta.Mu.Lock()
+	defer l.head.data.Meta.Mu.Unlock()
+
+	res := SongResponse{
+		ID:       l.head.data.ID,
+		Name:     l.head.data.Name,
+		Duration: l.head.data.Duration,
+	}
+
+	return res
 }
 
 func (l *DoublyLinkedList) AppendMany(data ...*Song) {
