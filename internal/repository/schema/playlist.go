@@ -50,9 +50,11 @@ func (l DownloadedSongList) Convert() []*domain.Song {
 
 func (s DownloadedSong) convert() *domain.Song {
 	return &domain.Song{
-		ID:       s.ID,
-		Name:     s.Name,
-		Duration: s.Duration.Duration,
+		Info: domain.Info{
+			ID:       s.ID,
+			Name:     s.Name,
+			Duration: s.Duration.Duration,
+		},
 	}
 }
 
@@ -81,14 +83,14 @@ func ConvToUploadList(s []*domain.Song) (UploadPlaylist, error) {
 }
 
 func convToUpload(s *domain.Song) (UploadSong, error) {
-	conv, err := time.ParseDuration(s.Duration.String())
+	conv, err := time.ParseDuration(s.Info.Duration.String())
 	if err != nil {
 		return UploadSong{}, err
 	}
 
 	res := UploadSong{
-		ID:       s.ID,
-		Name:     s.Name,
+		ID:       s.Info.ID,
+		Name:     s.Info.Name,
 		Duration: conv.String(),
 	}
 
