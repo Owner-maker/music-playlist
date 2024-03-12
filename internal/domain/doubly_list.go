@@ -1,12 +1,11 @@
 package domain
 
-import (
-	"fmt"
-)
+import "errors"
 
 type DoublyLinkedList struct {
-	head *Node
-	tail *Node
+	head   *Node
+	tail   *Node
+	cursor *Node
 }
 
 type Node struct {
@@ -28,6 +27,7 @@ func (l *DoublyLinkedList) Append(data *Song) {
 	if l.head == nil {
 		l.head = newNode
 		l.tail = newNode
+		l.cursor = newNode
 		return
 	}
 
@@ -36,14 +36,14 @@ func (l *DoublyLinkedList) Append(data *Song) {
 	l.tail = newNode
 }
 
-func (l *DoublyLinkedList) Get() SongResponse {
+func (l *DoublyLinkedList) Get() Info {
 	l.head.data.Meta.Mu.Lock()
 	defer l.head.data.Meta.Mu.Unlock()
 
-	res := SongResponse{
-		ID:       l.head.data.ID,
-		Name:     l.head.data.Name,
-		Duration: l.head.data.Duration,
+	res := Info{
+		ID:       l.head.data.Info.ID,
+		Name:     l.head.data.Info.Name,
+		Duration: l.head.data.Info.Duration,
 	}
 
 	return res
@@ -67,10 +67,38 @@ func (l *DoublyLinkedList) GetAll() []*Song {
 	return res
 }
 
-func (l *DoublyLinkedList) MoveBackward() {
-	current := l.tail
-	for current != nil {
-		fmt.Printf("%d -> ", current.data)
-		current = current.prev
+func (l *DoublyLinkedList) Current() *Song {
+	return l.cursor.data
+}
+
+func (l *DoublyLinkedList) Next() error {
+	l.cursor.data.Meta.Mu.Lock()
+	defer l.cursor.data.Meta.Mu.Unlock()
+
+	if l.cursor == nil {
+		return errors.New("empty list")
 	}
+
+	if l.cursor.next == nil {
+		return errors.New("end of list")
+	}
+
+	l.cursor = l.cursor.next
+	return nil
+}
+
+func (l *DoublyLinkedList) Prev() error {
+	l.cursor.data.Meta.Mu.Lock()
+	defer l.cursor.data.Meta.Mu.Unlock()
+
+	if l.cursor == nil {
+		return errors.New("empty list")
+	}
+
+	if l.cursor.prev == nil {
+		return errors.New("end of list")
+	}
+
+	l.cursor = l.cursor.prev
+	return nil
 }

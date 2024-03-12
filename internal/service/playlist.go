@@ -47,16 +47,16 @@ func (s Playlist) AddMany(data []*domain.Song) {
 	}
 }
 
-func (s Playlist) Get() domain.SongResponse {
+func (s Playlist) Get() domain.Info {
 	return s.cache.Get()
 }
 
-func (s Playlist) GetAll() []domain.SongResponse {
+func (s Playlist) GetAll() []domain.Info {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Playlist) Update(data *domain.Song) error {
+func (s Playlist) Update(data *domain.Info) error {
 	//TODO implement me
 	panic("implement me")
 }
